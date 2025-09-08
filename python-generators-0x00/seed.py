@@ -13,7 +13,11 @@ def create_database():
         if connection.is_connected():
             cursor = connection.cursor()
             cursor.execute("CREATE DATABASE IF NOT EXISTS ALX_prodev")
+<<<<<<< HEAD
             print("✅ Database ALX_prodev created successfully (or already exists)")
+=======
+            print(" Database ALX_prodev created successfully (or already exists)")
+>>>>>>> c5118663a28d1472ff7d24fa156e98785a87c25b
     except Error as e:
         print(f"Error: {e}")
     finally:
@@ -39,7 +43,11 @@ def create_table():
                     age INT
                 )
             """)
+<<<<<<< HEAD
             print("✅ Table user_data created successfully")
+=======
+            print(" Table user_data created successfully")
+>>>>>>> c5118663a28d1472ff7d24fa156e98785a87c25b
     except Error as e:
         print(f"Error: {e}")
     finally:
@@ -72,7 +80,11 @@ def insert_data(csv_file):
                     """, (user_id, name, email, age))
 
             connection.commit()
+<<<<<<< HEAD
             print("✅ Data inserted successfully")
+=======
+            print(" Data inserted successfully")
+>>>>>>> c5118663a28d1472ff7d24fa156e98785a87c25b
     except Error as e:
         print(f"Error: {e}")
     finally:
@@ -104,7 +116,11 @@ def connect_db():
             database="ALX_prodev"
         )
         if connection.is_connected():
+<<<<<<< HEAD
             print("✅ Connected to ALX_prodev database")
+=======
+            print(" Connected to ALX_prodev database")
+>>>>>>> c5118663a28d1472ff7d24fa156e98785a87c25b
             return connection
     except Error as e:
         print(f"Error: {e}")
