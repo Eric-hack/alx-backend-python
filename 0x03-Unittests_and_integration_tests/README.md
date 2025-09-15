@@ -50,6 +50,29 @@ def test_public_repos_url(self):
         self.assertEqual(client._public_repos_url, test_payload["repos_url"])
         mock_org.assert_called_once()
 
+### 6. More Patching
+
+#### Objective
+Unit-test the `GithubOrgClient.public_repos` method by mocking both the API response and the `_public_repos_url` property.
+
+##### What Was Done
+- Implemented `test_public_repos` inside `test_client.py`.
+- Patched:
+  - `client.get_json` → mocked to return a fake repos payload.
+  - `GithubOrgClient._public_repos_url` → mocked to return a fake API URL.
+- Verified that:
+  - The method `public_repos()` returns the expected list of repository names.
+  - Both mocks (`_public_repos_url` and `get_json`) are called **exactly once**.
+
+###### Example Test Payload
+```python
+test_payload = [
+    {"name": "repo1"},
+    {"name": "repo2"},
+    {"name": "repo3"},
+]
+
+
 ---
 
 ### `test_client.py`
