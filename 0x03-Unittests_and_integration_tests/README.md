@@ -24,9 +24,31 @@ This project covers writing unit and integration tests in Python using `unittest
   - The result is correct both times.
   - The underlying method is called only once (`assert_called_once`).
 
-4. **Memoization**
+### 4. Memoization
    - Tested `utils.memoize` decorator.
    - Verified a method call is cached (called once, reused on subsequent calls).
+
+### 5. Mocking a Property  
+
+In this task, we wrote a unit test for the **`_public_repos_url`** property of the `GithubOrgClient` class.
+
+#### What We Did
+- Mocked the `org` property using **`patch.object`** with `new_callable=PropertyMock`.  
+- Returned a fake payload containing a `repos_url`.  
+- Verified that `_public_repos_url` correctly extracts the mocked value.  
+- Ensured that the `org` property was called exactly once.  
+
+---
+
+#### Example Test Case
+```python
+def test_public_repos_url(self):
+    test_payload = {"repos_url": "https://api.github.com/orgs/testorg/repos"}
+    with patch.object(GithubOrgClient, "org", new_callable=PropertyMock) as mock_org:
+        mock_org.return_value = test_payload
+        client = GithubOrgClient("testorg")
+        self.assertEqual(client._public_repos_url, test_payload["repos_url"])
+        mock_org.assert_called_once()
 
 ---
 
