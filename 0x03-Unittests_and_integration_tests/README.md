@@ -1,27 +1,31 @@
 # Unittests and Integration Tests
 
-This project covers writing unittests and integration tests in Python using the `unittest` framework, `parameterized`, and `unittest.mock`.
+This project covers writing unit and integration tests in Python using `unittest`, `parameterized`, and `unittest.mock`.
 
-## Tasks Completed
+## Tasks
 
-### 0. Parameterize a Unit Test
+### 0. Parameterize a unit test
 - Implemented tests for `utils.access_nested_map`.
-- Used `@parameterized.expand` to test multiple inputs and expected outputs.
-- Verified correct results and raised `KeyError` for invalid paths.
+- Used `@parameterized.expand` to check multiple valid paths.
+- Verified expected values are returned.
 
-### 1. Parameterize a Unit Test (Exceptions)
-- Added tests for invalid paths in `access_nested_map`.
-- Confirmed that `KeyError` is raised with the correct exception message.
+### 1. Parameterize a unit test (exceptions)
+- Tested that `access_nested_map` raises `KeyError` for invalid paths.
+- Used `assertRaises` and confirmed exception messages.
 
-### 2. Mock HTTP Calls
-- Wrote tests for `utils.get_json`.
-- Patched `requests.get` using `unittest.mock.patch` to avoid real HTTP calls.
-- Verified:
-  - `requests.get` is called exactly once with the expected URL.
-  - The returned payload matches the mocked response.
+### 2. Mock HTTP calls
+- Tested `utils.get_json` without making real HTTP requests.
+- Used `unittest.mock.patch` to patch `requests.get`.
+- Verified correct payload is returned and `requests.get` is called once per test.
+
+### 3. Parameterize and patch (memoization)
+- Tested the `utils.memoize` decorator.
+- Verified that when accessing a memoized property twice:
+  - The result is correct both times.
+  - The underlying method is called only once (`assert_called_once`).
+
+---
 
 ## Running Tests
-Run all tests with:
-
 ```bash
-python -m unittest discover 0x03-Unittests_and_integration_tests -p "test_*.py" -v
+$ python -m unittest discover 0x03-Unittests_and_integration_tests -p "test_*.py" -v
