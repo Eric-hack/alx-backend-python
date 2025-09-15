@@ -24,8 +24,26 @@ This project covers writing unit and integration tests in Python using `unittest
   - The result is correct both times.
   - The underlying method is called only once (`assert_called_once`).
 
+4. **Memoization**
+   - Tested `utils.memoize` decorator.
+   - Verified a method call is cached (called once, reused on subsequent calls).
+
 ---
 
+### `test_client.py`
+Unit tests for `client.py`
+
+1. **GithubOrgClient.org**
+   - Tested `GithubOrgClient.org` returns correct payload.
+   - Used `@patch("client.get_json")` to mock API calls.
+   - Parametrized with `google` and `abc` organizations.
+   - Verified `get_json` is called exactly once with the expected URL.
+
+---
+
+
 ## Running Tests
+Run tests individually:
 ```bash
-$ python -m unittest discover 0x03-Unittests_and_integration_tests -p "test_*.py" -v
+python -m unittest 0x03-Unittests_and_integration_tests/test_utils.py -v
+python -m unittest 0x03-Unittests_and_integration_tests/test_client.py -v
