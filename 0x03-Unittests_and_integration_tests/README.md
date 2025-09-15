@@ -79,6 +79,26 @@ test_payload = [
     {"name": "repo3"},
 ]
 ```
+---
+### 7. Parameterize `has_license`
+
+#### Implemented `test_has_license` for `GithubOrgClient.has_license`
+#### Used `@parameterized.expand` to test with multiple repo/license cases:
+##### Repo with matching license: returns `True`.
+##### Repowith different license: returns `False`.
+#### Verified expected results with `assertEqual`
+
+#### Example Test Cases
+```python
+@parameterized.expand([
+    ({"license": {"key": "my_license"}}, "my_license", True),
+    ({"license": {"key": "other_license"}}, "my_license", False),
+])
+def test_has_license(self, repo, license_key, expected):
+    result = GithubOrgClient.has_license(repo, license_key)
+    self.assertEqual(result, expected)
+
+```
 
 ---
 
