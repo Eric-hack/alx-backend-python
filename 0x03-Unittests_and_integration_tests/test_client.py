@@ -84,7 +84,6 @@ class MockResponse:
     def json(self):
         return self._payload
 
-@parameterized_class
 @parameterized_class(
     ("org_payload", "repos_payload", "expected_repos", "apache2_repos"),
     [(org_payload, repos_payload, expected_repos, apache2_repos)],
