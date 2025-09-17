@@ -5,7 +5,6 @@ import unittest
 from unittest.mock import patch, PropertyMock
 from client import GithubOrgClient
 from parameterized import parameterized, parameterized_class
-from client import GithubOrgClient
 from fixtures import org_payload, repos_payload, expected_repos, apache2_repos
 
 
@@ -84,44 +83,54 @@ class MockResponse:
     def json(self):
         return self._payload
 
-@parameterized_class(
-    ("org_payload", "repos_payload", "expected_repos", "apache2_repos"),
-    [(org_payload, repos_payload, expected_repos, apache2_repos)],
-)
+@parameterized_class((
+    "org_payload", "repos_payload", "expected_repos", "apache2_repos"
+), [
+    (org_payload, repos_payload, expected_repos, apache2_repos),
+])
 class TestIntegrationGithubOrgClient(unittest.TestCase):
-    """Integration tests for GithubOrgClient.public_repos"""
+    """Integration tests for the GithubOrgClient.public_repos method."""
 
     @classmethod
     def setUpClass(cls):
+        """Start patcher for requests.get and mock responses."""
         cls.get_patcher = patch("requests.get")
 
         mock_get = cls.get_patcher.start()
 
+        # Side effect function to simulate API responses
         def side_effect(url):
-            if url == GithubOrgClient.ORG_URL.format(org="testorg"):
-                return unittest.mock.Mock(json=lambda: cls.org_payload)
-            if url == cls.org_payload["repos_url"]:
-                return unittest.mock.Mock(json=lambda: cls.repos_payload)
-            return unittest.mock.Mock(json=lambda: {})
+            class MockResponse:
+                def __init__(self, payload):
+                    self._payload = payload
 
-        # Side effects for different endpoints
+                def json(self):
+                    return self._payload
+
+            if url == GithubOrgClient.ORG_URL.format(org="testorg"):
+                return MockResponse(cls.org_payload)
+            elif url == cls.org_payload["repos_url"]:
+                return MockResponse(cls.repos_payload)
+            return MockResponse({})
+
         mock_get.side_effect = side_effect
 
     @classmethod
     def tearDownClass(cls):
-        """Stop patcher"""
+        """Stop patcher after tests."""
         cls.get_patcher.stop()
 
     def test_public_repos(self):
-        """Test public_repos returns expected repositories"""
+        """Test public_repos returns expected repositories."""
         client = GithubOrgClient("testorg")
         self.assertEqual(client.public_repos(), self.expected_repos)
 
     def test_public_repos_with_license(self):
-        """Test public_repos filters repositories by license"""
+        """Test public_repos filters repositories by license."""
         client = GithubOrgClient("testorg")
         self.assertEqual(
-            client.public_repos(license="apache-2.0"), self.apache2_repos
+            client.public_repos(license="apache-2.0"),
+            self.apache2_repos
         )
 
 

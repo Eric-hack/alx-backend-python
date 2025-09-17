@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fixtures for integration tests in test_client.py."""
+"""Fixtures for integration tests."""
 
 org_payload = {
     "login": "testorg",
