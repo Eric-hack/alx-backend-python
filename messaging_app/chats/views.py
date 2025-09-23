@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """ViewSets for conversations and messages in chats app."""
 
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, filters
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from django.shortcuts import get_object_or_404
@@ -15,6 +15,8 @@ class ConversationViewSet(viewsets.ModelViewSet):
 
     queryset = Conversation.objects.all().prefetch_related("participants", "message_set")
     serializer_class = ConversationSerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ["participants__email"]
 
     def create(self, request, *args, **kwargs):
         """Create a new conversation with participants."""
