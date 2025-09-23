@@ -23,6 +23,7 @@ class User(AbstractUser):
 
     # Ensure email is unique
     email = models.EmailField(unique=True)
+    password = models.CharField(max_length=128, null=False)
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["username", "first_name", "last_name"]
