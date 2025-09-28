@@ -78,3 +78,25 @@ class OffensiveLanguageMiddleware:
         else:
             ip = request.META.get('REMOTE_ADDR')
         return ip
+
+class RolePermissionMiddleware:
+    """
+    Middleware to enforce role-based permissions on chat actions.
+    Only users with roles 'admin' or 'moderator' are allowed.
+    """
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        # Example: Only restrict access for POST, PUT, DELETE to /api/admin/ or /api/moderator/ paths
+        restricted_paths = ['/api/admin/', '/api/moderator/']  # adjust paths as needed
+
+        if any(request.path.startswith(path) for path in restricted_paths):
+            user = getattr(request, 'user', None)
+            
+            # Check if user is authenticated and has allowed role
+            if not user or not user.is_authenticated or user.role not in ['admin', 'moderator']:
+                return HttpResponseForbidden("You do not have permission to perform this action.")
+
+        response = self.get_response(request)
+        return response
