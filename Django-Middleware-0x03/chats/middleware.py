@@ -79,7 +79,7 @@ class OffensiveLanguageMiddleware:
             ip = request.META.get('REMOTE_ADDR')
         return ip
 
-class RolePermissionMiddleware:
+class RolepermissionMiddleware:
     """
     Middleware to enforce role-based permissions on chat actions.
     Only users with roles 'admin' or 'moderator' are allowed.
