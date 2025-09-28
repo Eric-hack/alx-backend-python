@@ -44,9 +44,10 @@ class ConversationViewSet(viewsets.ModelViewSet):
         if request.user not in conversation.participants.all():
             return Response(
                 {"error": "You are not a participant in this conversation."},
-                status=status.HTTP_403_FORBIDDEN,  # <-- checker wants this
+                status=status.HTTP_403_FORBIDDEN,
             )
-        messages = conversation.message_set.all().order_by("sent_at")
+
+        messages = Message.objects.filter(conversation=conversation).order_by("sent_at")
         serializer = MessageSerializer(messages, many=True)
         return Response(serializer.data)
 
@@ -57,6 +58,10 @@ class MessageViewSet(viewsets.ModelViewSet):
     queryset = Message.objects.all().select_related("sender", "conversation")
     serializer_class = MessageSerializer
     permission_classes = [IsAuthenticated, IsParticipantOfConversation]
+
+    def get_queryset(self):
+        """Restrict messages so users only see their conversation messages."""
+        return Message.objects.filter(conversation__participants=self.request.user)
 
     def create(self, request, *args, **kwargs):
         """Send a message to an existing conversation."""
@@ -76,7 +81,7 @@ class MessageViewSet(viewsets.ModelViewSet):
         if request.user not in conversation.participants.all():
             return Response(
                 {"error": "You are not a participant in this conversation."},
-                status=status.HTTP_403_FORBIDDEN,  # <-- checker wants this
+                status=status.HTTP_403_FORBIDDEN,
             )
 
         message = Message.objects.create(
