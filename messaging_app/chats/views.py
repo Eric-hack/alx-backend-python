@@ -5,9 +5,11 @@ from rest_framework import viewsets, status, filters
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from django.shortcuts import get_object_or_404
+from rest_framework.permissions import IsAuthenticated
 
 from .models import Conversation, Message, User
 from .serializers import ConversationSerializer, MessageSerializer
+from .permissions import IsParticipantOfConversation
 
 
 class ConversationViewSet(viewsets.ModelViewSet):
@@ -17,6 +19,11 @@ class ConversationViewSet(viewsets.ModelViewSet):
     serializer_class = ConversationSerializer
     filter_backends = [filters.SearchFilter]
     search_fields = ["participants__email"]
+    permission_classes = [IsAuthenticated, IsParticipantOfConversation]
+
+    def get_queryset(self):
+        """Return only conversations the current user participates in."""
+        return Conversation.objects.filter(participants=self.request.user)
 
     def create(self, request, *args, **kwargs):
         """Create a new conversation with participants."""
@@ -36,8 +43,9 @@ class ConversationViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=["get"])
     def messages(self, request, pk=None):
-        """Get all messages in a conversation."""
+        """Get all messages in a conversation (restricted to participants)."""
         conversation = self.get_object()
+        self.check_object_permissions(request, conversation)
         messages = conversation.message_set.all().order_by("sent_at")
         serializer = MessageSerializer(messages, many=True)
         return Response(serializer.data)
@@ -48,9 +56,14 @@ class MessageViewSet(viewsets.ModelViewSet):
 
     queryset = Message.objects.all().select_related("sender", "conversation")
     serializer_class = MessageSerializer
+    permission_classes = [IsAuthenticated, IsParticipantOfConversation]
+
+    def get_queryset(self):
+        """Return only messages from conversations the current user is part of."""
+        return Message.objects.filter(conversation__participants=self.request.user)
 
     def create(self, request, *args, **kwargs):
-        """Send a message to an existing conversation."""
+        """Send a message to an existing conversation (only if participant)."""
         conversation_id = request.data.get("conversation")
         sender_id = request.data.get("sender")
         message_body = request.data.get("message_body")
@@ -62,6 +75,8 @@ class MessageViewSet(viewsets.ModelViewSet):
             )
 
         conversation = get_object_or_404(Conversation, conversation_id=conversation_id)
+        self.check_object_permissions(request, conversation)  #enforce participant check
+
         sender = get_object_or_404(User, user_id=sender_id)
 
         message = Message.objects.create(
