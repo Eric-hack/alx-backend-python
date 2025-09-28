@@ -52,12 +52,30 @@ class ConversationViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
+from rest_framework import viewsets, status, filters
+from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.permissions import IsAuthenticated
+
+from .models import Conversation, Message, User
+from .serializers import MessageSerializer
+from .permissions import IsParticipantOfConversation
+from .filters import MessageFilter
+from .pagination import MessagePagination
+
+
 class MessageViewSet(viewsets.ModelViewSet):
     """ViewSet for listing and creating messages."""
 
     queryset = Message.objects.all().select_related("sender", "conversation")
     serializer_class = MessageSerializer
     permission_classes = [IsAuthenticated, IsParticipantOfConversation]
+    pagination_class = MessagePagination
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_class = MessageFilter
+    search_fields = ["message_body"]
+    ordering_fields = ["sent_at"]
 
     def get_queryset(self):
         """Restrict messages so users only see their conversation messages."""
@@ -91,3 +109,4 @@ class MessageViewSet(viewsets.ModelViewSet):
         )
         serializer = self.get_serializer(message)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
