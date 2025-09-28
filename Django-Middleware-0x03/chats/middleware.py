@@ -3,6 +3,8 @@ import os
 from datetime import datetime
 from django.conf import settings
 from django.http import HttpResponseForbidden
+import time
+
 
 class RequestLoggingMiddleware:
     def __init__(self, get_response):
