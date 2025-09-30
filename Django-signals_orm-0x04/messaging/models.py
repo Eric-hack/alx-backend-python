@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from .managers import UnreadMessagesManager  
 
 
 class Message(models.Model):
@@ -13,18 +14,23 @@ class Message(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     edited = models.BooleanField(default=False)
 
-    # 🔑 New field for threaded replies
+    # Threaded replies
     parent_message = models.ForeignKey(
         "self", null=True, blank=True, related_name="replies", on_delete=models.CASCADE
     )
 
+    # Read/unread tracking
+    read = models.BooleanField(default=False)
+
+    # Managers
+    objects = models.Manager()  # Default manager
+    unread = UnreadMessagesManager()  # custom unread manager
+
     def __str__(self):
         return f"From {self.sender} to {self.receiver}: {self.content[:20]}"
 
-    # Recursive function to fetch threaded replies
     def get_thread(self):
-        """Recursively fetch this message and all replies in threaded format"""
-        thread = {
+        return {
             "id": self.id,
             "sender": self.sender.username,
             "receiver": self.receiver.username,
@@ -32,7 +38,6 @@ class Message(models.Model):
             "timestamp": self.timestamp,
             "replies": [reply.get_thread() for reply in self.replies.all()],
         }
-        return thread
 
 
 class Notification(models.Model):

@@ -1,5 +1,5 @@
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
@@ -57,3 +57,7 @@ def send_message(request, receiver_id):
         return JsonResponse({"id": message.id, "content": message.content})
 
     return JsonResponse({"error": "Invalid request"}, status=400)
+
+def unread_inbox(request):
+    unread_messages = Message.unread.unread_for_user(request.user)  # ✅ correct method name
+    return render(request, "messaging/unread_inbox.html", {"messages": unread_messages})
