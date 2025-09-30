@@ -4,6 +4,9 @@ from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
 from .models import Message
+from django.shortcuts import render, get_object_or_404
+from django.views.decorators.cache import cache_page
+
 
 @login_required
 def delete_user(request):
@@ -66,3 +69,17 @@ def unread_inbox(request):
     )
 
     return render(request, "messaging/unread_inbox.html", {"messages": unread_messages})
+
+@cache_page(60) 
+def conversation(request, username):
+    """View to display a conversation between the logged-in user and another user"""
+    receiver = get_object_or_404(User, username=username)
+    messages = Message.objects.filter(
+        sender__in=[request.user, receiver],
+        receiver__in=[request.user, receiver]
+    ).order_by("timestamp")
+
+    return render(request, "chats/conversation.html", {
+        "messages": messages,
+        "receiver": receiver,
+    })
