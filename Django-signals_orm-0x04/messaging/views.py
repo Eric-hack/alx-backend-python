@@ -59,5 +59,10 @@ def send_message(request, receiver_id):
     return JsonResponse({"error": "Invalid request"}, status=400)
 
 def unread_inbox(request):
-    unread_messages = Message.unread.unread_for_user(request.user)  # ✅ correct method name
+    # Use the custom manager
+    unread_messages = (
+        Message.unread.unread_for_user(request.user)
+        .only("id", "sender", "receiver", "content", "timestamp")
+    )
+
     return render(request, "messaging/unread_inbox.html", {"messages": unread_messages})
