@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 from datetime import timedelta
 
@@ -89,8 +90,12 @@ WSGI_APPLICATION = 'messaging_app.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': os.environ.get('MYSQL_DB', 'messaging_db'),
+        'USER': os.environ.get('MYSQL_USER', 'myuser'),
+        'PASSWORD': os.environ.get('MYSQL_PASSWORD', 'mypassword'),
+        'HOST': os.environ.get('MYSQL_HOST', 'db'),
+        'PORT': '3306',
     }
 }
 
