@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# Blue-Green deployment script for messaging_app
+
+set -e
+
+echo "Deploying Blue version..."
+kubectl apply -f blue_deployment.yaml
+
+echo "Deploying Green version..."
+kubectl apply -f green_deployment.yaml
+
+echo "Applying Service..."
+kubectl apply -f kubeservice.yaml
+
+echo "Waiting for pods to be ready..."
+kubectl rollout status deployment/messaging-app-blue || true
+kubectl rollout status deployment/messaging-app-green || true
+
+echo "Checking logs for Green version..."
+GREEN_POD=$(kubectl get pods -l app=messaging-app,version=green -o jsonpath="{.items[0].metadata.name}")
+kubectl logs "$GREEN_POD" --tail=20
+
+echo "✅ Deployment complete!"
+echo "👉 To switch traffic to green version, edit kubeservice.yaml and set 'version: green'"
+
