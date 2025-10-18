@@ -17,6 +17,7 @@ spec:
       containers:
         - name: messaging-app
           image: messaging_app-web:latest  # <-- replace with your exact image name
+          imagePullPolicy: Never
           ports:
             - containerPort: 8000
 ---
