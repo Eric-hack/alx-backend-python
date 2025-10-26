@@ -3,6 +3,8 @@ pipeline {
 
     environment {
         VENV = "venv"
+        IMAGE_NAME = "your-dockerhub-username/messaging_app"
+        IMAGE_TAG = "latest"
     }
 
     stages {
@@ -14,12 +16,12 @@ pipeline {
             }
         }
 
-        stage('Install Python Dependencies') {
+        stage('Set up Python Environment') {
             steps {
                 script {
                     sh '''
                         python3 -m venv ${VENV}
-                        . ${VENV}/bin/activate
+                        source ${VENV}/bin/activate
                         pip install --upgrade pip
                         pip install -r messaging_app/requirements.txt
                     '''
@@ -31,7 +33,7 @@ pipeline {
             steps {
                 script {
                     sh '''
-                        . ${VENV}/bin/activate
+                        source ${VENV}/bin/activate
                         pytest messaging_app/tests/ --junitxml=report.xml --maxfail=1 --disable-warnings
                     '''
                 }
@@ -42,14 +44,37 @@ pipeline {
                 }
             }
         }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    sh '''
+                        docker build -t ${IMAGE_NAME}:${IMAGE_TAG} -f messaging_app/Dockerfile messaging_app/
+                    '''
+                }
+            }
+        }
+
+        stage('Push Docker Image') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub_credentials', usernameVariable: 'DOCKERHUB_USER', passwordVariable: 'DOCKERHUB_PASS')]) {
+                    script {
+                        sh '''
+                            echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USER" --password-stdin
+                            docker push ${IMAGE_NAME}:${IMAGE_TAG}
+                        '''
+                    }
+                }
+            }
+        }
     }
 
     post {
         success {
-            echo "✅ Tests passed successfully!"
+            echo "✅ Build and push successful!"
         }
         failure {
-            echo "❌ Tests failed! Please check the report."
+            echo "❌ Build failed! Check logs."
         }
     }
 }
