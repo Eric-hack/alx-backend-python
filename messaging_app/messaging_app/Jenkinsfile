@@ -14,6 +14,17 @@ pipeline {
             }
         }
 
+        stage('Install System Dependencies') {
+            steps {
+                script {
+                    sh '''
+                        apt-get update
+                        apt-get install -y python3-dev default-libmysqlclient-dev build-essential pkg-config
+                    '''
+                }
+            }
+        }
+
         stage('Set up Python Environment') {
             steps {
                 script {
