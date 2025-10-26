@@ -1,5 +1,10 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'python:3.10'
+            args '-u root'  // Run as root user inside container
+        }
+    }
 
     environment {
         VENV = "venv"
@@ -16,36 +21,30 @@ pipeline {
 
         stage('Install System Dependencies') {
             steps {
-                script {
-                    sh '''
-                        apt-get update
-                        apt-get install -y pkg-config libmysqlclient-dev build-essential python3-dev
-                    '''
-                }
+                sh '''
+                    apt-get update
+                    apt-get install -y pkg-config libmysqlclient-dev build-essential python3-dev
+                '''
             }
         }
 
         stage('Install Python Dependencies') {
             steps {
-                script {
-                    sh '''
-                        python3 -m venv ${VENV}
-                        . ${VENV}/bin/activate
-                        pip install --upgrade pip
-                        pip install -r messaging_app/requirements.txt
-                    '''
-                }
+                sh '''
+                    python3 -m venv ${VENV}
+                    . ${VENV}/bin/activate
+                    pip install --upgrade pip
+                    pip install -r messaging_app/requirements.txt
+                '''
             }
         }
 
         stage('Run Tests') {
             steps {
-                script {
-                    sh '''
-                        . ${VENV}/bin/activate
-                        pytest messaging_app/tests/ --junitxml=report.xml --maxfail=1 --disable-warnings
-                    '''
-                }
+                sh '''
+                    . ${VENV}/bin/activate
+                    pytest messaging_app/tests/ --junitxml=report.xml --maxfail=1 --disable-warnings
+                '''
             }
             post {
                 always {
